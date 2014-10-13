@@ -87,7 +87,7 @@
 				</section>
 
 				<section>
-					<h2>Simplified assumption</h2>
+					<h2>Simplification</h2>
 					<p>Diffuse / Specular</p>
 					<img width="780" src="images/simplified.jpg" alt="simplified">
 				</section>
@@ -98,7 +98,7 @@
 				</section>
 
 				<section>
-					<h2>Specular</h2>
+					<h2>Specular <a href="http://blog.selfshadow.com/publications/s2014-shading-course/hoffman/s2014_pbs_physics_math_slides.pdf">[5]</a></h2>
                                         <p>F: Fresnel (F_Schlick)</p>
                                         <p>D: Normal distribution function (D_GGX)</p>
                                         <p>G: Geometry function (G_SmithGGX)</p>
@@ -116,6 +116,7 @@
 						<li>HDR Environments</li>
 						<li style="text-decoration: line-through">Area lights</li>
                                                 <li style="text-decoration: line-through">Camera</li>
+                                                <li>Use reference <a href="http://www.mitsuba-renderer.org/">mitsuba [5]</a></li>
 					</ul>
 				</section>
 
@@ -135,12 +136,58 @@
 				</section>
 
 				<section>
-                                        <h2>Reflection</h2>
+                                        <h2>Irradiance</h2>
+                                        <img width="580" src="images/Irradiance.png" alt="irradiance">
+				</section>
+
+				<section>
+                                  <h2>Pseudo code Diffuse</h2>
+
+					<pre><code data-trim contenteditable>
+
+for ( int i = 0; i < nbSamples; i++ ) {
+
+    vec2 u       =  getSample(i);
+    vec3 h       =  importanceSampleCos(u);
+    vec3 l       =  h;
+    vec3 dir     =  iblTransform * l;
+    vec3 env     =  textureCubeLod( ibl, dir, 0.0 );
+    contrib      += env / PI;
+
+}
+					</code></pre>
+                                </section>
+
+
+
+				<section>
+                                        <h2>Specular</h2>
                                         <p>prefilter roughness or more <a href="http://blog.selfshadow.com/publications/s2013-shading-course/karis/s2013_pbs_epic_notes_v2.pdf">[2]</a></p>
                                         <p>importance sampling <a href="http://http.developer.nvidia.com/GPUGems3/gpugems3_ch20.html">[3]</a></p>
                                         <img width="980" src="images/HDR_112_River_Road_2_Bg2.jpg" alt="environment">
 					<small>image from hdri-hub.com <a href="http://www.hdri-hub.com/hdrishop/freesamples/freehdri/item/115-hdr-112-river-road-free">[7]</a></small>
 				</section>
+
+				<section>
+                                  <h2>Pseudo code Specular</h2>
+					<pre><code data-trim contenteditable>
+
+for ( int i = 0; i < nbSamples; i++ ) {
+
+    vec2  u       =  getSample(i);
+    vec3  h       =  importanceSampleGGX(u);
+    vec3  l       =  reflect(v, h);
+    float g       =  g_smithGGX( roughness, NoV, NoL);
+    vec3  f       =  f_schlick( f0, NoH);
+    float d       =  d_ggx( NoH, roughness);
+    vec3  dir     =  iblTransform * l;
+    vec3  env     =  textureCubeLod( ibl, dir, 0.0 );
+    contrib      +=  env * g * f * d / ( 4.0 * NoV * NoL );
+
+}
+					</code></pre>
+                                </section>
+
 
 				<section>
                                   <h2>Importance sampling</h2>
@@ -289,6 +336,10 @@ vec4 computeUVForMipmap( const in float level, const in vec2 uv, const in vec2 s
                                   <small><a href="http://blog.selfshadow.com/publications/s2013-shading-course/">13 Siggraph 2013</a></small><br>
                                   <small><a href="http://blog.selfshadow.com/publications/s2014-shading-course/">14 Siggraph 2014</a></small><br>
                                   <small><a href="http://www.pbrt.org/">15 PBR from theory to implementation</a></small><br>
+                                  <small><a href="http://holger.dammertz.org/stuff/notes_HammersleyOnHemisphere.html">16 Hammersley importance sampling</a></small><br>
+                                  <small><a href="http://www.mitsuba-renderer.org/">17 Mitsuba PBR renderer</a></small><br>
+
+
 
                                 </section>
 
